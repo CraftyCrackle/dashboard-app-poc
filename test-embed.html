@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Test Chart Embed</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+      .chart-container {
+        margin: 20px 0;
+        padding: 20px;
+        border: 1px solid #eee;
+        border-radius: 8px;
+        height: 400px;
+      }
+      h1 {
+        color: #333;
+      }
+      .debug-info {
+        margin-top: 20px;
+        padding: 10px;
+        background-color: #f5f5f5;
+        border-radius: 4px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Test Chart Embed</h1>
+    <div class="chart-container">
+      <canvas id="myChart"></canvas>
+    </div>
+    <div class="debug-info">
+      <h3>Debug Information</h3>
+      <p>
+        Chart ID:
+        eyJkIjoiNjdhNjliZjVhNWM1ZDEwNDhkZDUwNTJhIiwiYyI6InRlc3RpbmcgcGllIGNoYXJ0In0=
+      </p>
+      <p>If you see only a grid, check the browser's console for errors.</p>
+    </div>
+
+    <script>
+      // Get the current host (works in both development and production)
+      const getApiHost = () => {
+        if (
+          window.location.hostname === "localhost" ||
+          window.location.hostname === "127.0.0.1"
+        ) {
+          return "http://localhost";
+        }
+        return window.location.origin;
+      };
+
+      function renderChart() {
+        try {
+          const chartData = {
+            type: "pie",
+            title: "testing pie chart",
+            data: {
+              labels: [
+                "i_Industry_Total",
+                "e_20-49",
+                "a_0",
+                "g_100-199",
+                "b_1-5",
+                "c_6-9",
+                "h_200+",
+                "d_10-19",
+                "f_50-99",
+              ],
+              datasets: [
+                {
+                  label: "testing pie chart",
+                  data: [
+                    71652.0, 480.0, 46134.0, 27.0, 21777.0, 1965.0, 15.0,
+                    1140.0, 111.0,
+                  ],
+                  backgroundColor: [
+                    "rgba(255, 99, 132, 0.5)",
+                    "rgba(54, 162, 235, 0.5)",
+                    "rgba(255, 206, 86, 0.5)",
+                    "rgba(75, 192, 192, 0.5)",
+                    "rgba(153, 102, 255, 0.5)",
+                    "rgba(255, 99, 132, 0.5)",
+                    "rgba(54, 162, 235, 0.5)",
+                    "rgba(255, 206, 86, 0.5)",
+                    "rgba(75, 192, 192, 0.5)",
+                  ],
+                  borderColor: [
+                    "rgba(255, 99, 132, 0.5)",
+                    "rgba(54, 162, 235, 0.5)",
+                    "rgba(255, 206, 86, 0.5)",
+                    "rgba(75, 192, 192, 0.5)",
+                    "rgba(153, 102, 255, 0.5)",
+                    "rgba(255, 99, 132, 0.5)",
+                    "rgba(54, 162, 235, 0.5)",
+                    "rgba(255, 206, 86, 0.5)",
+                    "rgba(75, 192, 192, 0.5)",
+                  ],
+                  borderWidth: 1,
+                },
+              ],
+            },
+          };
+
+          const ctx = document.getElementById("myChart").getContext("2d");
+          new Chart(ctx, {
+            type: chartData.type,
+            data: chartData.data,
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: {
+                  position: "top",
+                },
+                title: {
+                  display: true,
+                  text: chartData.title,
+                },
+              },
+            },
+          });
+        } catch (error) {
+          console.error("Error rendering chart:", error);
+          document.querySelector(".chart-container").innerHTML =
+            '<p style="color: red; text-align: center;">Error rendering chart. Please check the console for details.</p>';
+        }
+      }
+
+      renderChart();
+    </script>
+  </body>
+</html>
