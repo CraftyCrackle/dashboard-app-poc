@@ -25,12 +25,17 @@ db.audit_log.createIndex({ timestamp: 1 });
 db.audit_log.createIndex({ user_id: 1 });
 
 // Create default admin user if not exists
-db.users.insertOne({
-  email: "admin@hospital.com",
-  password: "$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewFpxYLHS.O9U5Yy", // Default: admin123
-  name: "Admin User",
-  organization: "Hospital Admin",
-  role: "admin",
-  created_at: new Date(),
-  updated_at: new Date(),
-});
+db.users.updateOne(
+  { email: "admin@hospital.com" },
+  {
+    $setOnInsert: {
+      email: "admin@hospital.com",
+      password: "$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewFpxYLHS.bXqhl6", // admin123
+      name: "Admin User",
+      organization: "Hospital",
+      role: "admin",
+      created_at: new Date(),
+    },
+  },
+  { upsert: true }
+);

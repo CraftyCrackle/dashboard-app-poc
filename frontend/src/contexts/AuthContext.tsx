@@ -1,9 +1,15 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import axios from "axios";
 
+// Configure axios defaults
+axios.defaults.withCredentials = true;
+
 // Get API URL from window.env or fallback to environment variable
 const API_URL =
-  (window as any).env?.REACT_APP_API_URL || process.env.REACT_APP_API_URL;
+  (window as any).env?.REACT_APP_API_URL ||
+  process.env.REACT_APP_API_URL ||
+  "http://localhost";
+axios.defaults.baseURL = API_URL;
 
 interface User {
   email: string;
@@ -59,23 +65,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const fetchUserProfile = async () => {
     try {
-      console.log("Fetching user profile from:", `${API_URL}/auth/profile`);
-      const response = await axios.get(`${API_URL}/auth/profile`);
-      console.log("Profile fetch successful:", response.data);
+      const token = localStorage.getItem("token");
+      if (!token) throw new Error("No authentication token found");
+
+      const response = await axios.get(`/auth/profile`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
       setUser(response.data);
       setIsAuthenticated(true);
-    } catch (error: any) {
-      console.error(
-        "Error fetching user profile:",
-        error.response?.data || error
-      );
-      if (error.response?.status === 401 || error.response?.status === 404) {
-        console.log("Unauthorized or not found, clearing auth state");
-        localStorage.removeItem("token");
-        delete axios.defaults.headers.common["Authorization"];
-        setIsAuthenticated(false);
-        setUser(null);
-      }
+    } catch (error) {
+      console.error("Error fetching user profile:", error);
+      localStorage.removeItem("token");
+      delete axios.defaults.headers.common["Authorization"];
+      setUser(null);
+      setIsAuthenticated(false);
     } finally {
       setLoading(false);
     }
@@ -83,17 +87,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const login = async (email: string, password: string) => {
     try {
-      console.log("Attempting login at:", `${API_URL}/auth/login`);
-      const response = await axios.post(
-        `${API_URL}/auth/login`,
-        {
-          email,
-          password,
-        },
-        {
-          withCredentials: true,
-        }
-      );
+      console.log("Attempting login at:", `/auth/login`);
+      const response = await axios.post(`/auth/login`, {
+        email,
+        password,
+      });
 
       console.log("Login successful");
       const { access_token, user: userData } = response.data;
@@ -102,7 +100,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       setUser(userData);
       setIsAuthenticated(true);
     } catch (error: any) {
-      console.error("Login error:", error.response?.data || error);
+      console.error("Login error:", error);
       throw error;
     }
   };
@@ -116,10 +114,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const register = async (userData: RegisterData) => {
     try {
-      const response = await axios.post(
-        `${API_URL}/api/auth/register`,
-        userData
-      );
+      const response = await axios.post(`/auth/register`, userData);
 
       const { access_token } = response.data;
       localStorage.setItem("token", access_token);

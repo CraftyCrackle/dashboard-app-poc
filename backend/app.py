@@ -21,24 +21,13 @@ def create_app():
     
     # Configure CORS
     CORS(app, resources={
-        r"/dashboard/public/chart/*": {
-            "origins": "*",
-            "methods": ["GET", "OPTIONS"],
-            "allow_headers": ["Content-Type", "Authorization"],
-            "expose_headers": ["Authorization"],
-            "supports_credentials": False,
-            "max_age": 3600
-        },
         r"/*": {
             "origins": ["http://localhost:3000"],
             "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
             "allow_headers": ["Content-Type", "Authorization"],
             "expose_headers": ["Authorization"],
             "supports_credentials": True,
-            "max_age": 3600,
-            "send_wildcard": False,
-            "automatic_options": True,
-            "vary_header": True
+            "max_age": 3600
         }
     })
     

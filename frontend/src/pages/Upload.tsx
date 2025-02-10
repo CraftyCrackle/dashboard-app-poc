@@ -174,9 +174,15 @@ const Upload: React.FC = () => {
     }
 
     try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        throw new Error("No authentication token found");
+      }
+
       const response = await axios.post(`${API_URL}/data/upload`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${token}`,
         },
         withCredentials: true,
       });

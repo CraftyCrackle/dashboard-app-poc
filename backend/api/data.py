@@ -1,5 +1,5 @@
 from flask_restx import Namespace, Resource, fields
-from flask import request, current_app
+from flask import request, current_app, make_response
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from werkzeug.utils import secure_filename
 from kafka import KafkaProducer
@@ -152,13 +152,22 @@ stream_data_model = data_ns.model('StreamData', {
 
 @data_ns.route('/upload')
 class FileUpload(Resource):
-    @api_key_required
+    def options(self):
+        """Handle preflight request for POST method"""
+        response = make_response()
+        response.headers.add('Access-Control-Allow-Origin', 'http://localhost:3000')
+        response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+        response.headers.add('Access-Control-Allow-Methods', 'POST')
+        response.headers.add('Access-Control-Allow-Credentials', 'true')
+        return response
+
+    @jwt_required()
     @data_ns.expect(file_upload_model)
     def post(self):
         """Upload and process a CSV file"""
         temp_path = None
         try:
-            current_user_id = request.user_id
+            current_user_id = get_jwt_identity()
             db = get_db()
             
             if 'file' not in request.files:
