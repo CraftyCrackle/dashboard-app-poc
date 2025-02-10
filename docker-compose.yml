@@ -72,6 +72,12 @@ services:
         "0.25",
         "--keyFile",
         "/data/mongodb/keyfile",
+        "--storageEngine",
+        "wiredTiger",
+        "--wiredTigerEngineConfigString",
+        "cache_size=256M,file_manager=(close_idle_time=10,close_scan_interval=5)",
+        "--oplogSize",
+        "128",
       ]
     healthcheck:
       test: mongosh --eval "try { if(rs.status().ok) { quit(0) } else { quit(1) } } catch(e) { quit(1) }"
@@ -86,6 +92,8 @@ services:
       resources:
         limits:
           memory: 256M
+    tmpfs:
+      - /tmp
 
   zookeeper:
     image: confluentinc/cp-zookeeper:7.3.0
