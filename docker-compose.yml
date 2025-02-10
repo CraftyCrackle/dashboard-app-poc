@@ -18,6 +18,10 @@ services:
     networks:
       - app-network
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 256M
 
   backend:
     build:
@@ -45,12 +49,10 @@ services:
     networks:
       - app-network
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
+    deploy:
+      resources:
+        limits:
+          memory: 200M
 
   mongodb:
     image: mongo:6.0
@@ -78,11 +80,16 @@ services:
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
+      ZOOKEEPER_HEAP_OPTS: "-Xmx128M -Xms64M"
     ports:
       - "2181:2181"
     networks:
       - app-network
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 128M
 
   kafka:
     image: confluentinc/cp-kafka:7.3.0
@@ -93,18 +100,23 @@ services:
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://34.229.150.85:9092
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
       KAFKA_DELETE_TOPIC_ENABLE: "true"
+      KAFKA_HEAP_OPTS: "-Xmx256M -Xms128M"
     networks:
       - app-network
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 256M
 
   nginx:
-    image: nginx:1.25
+    image: nginx:1.25-alpine
     ports:
       - "80:80"
     volumes:
@@ -116,11 +128,10 @@ services:
     networks:
       - app-network
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "nginx", "-t"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 64M
 
 networks:
   app-network:
